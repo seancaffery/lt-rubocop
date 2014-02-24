@@ -1,0 +1,4 @@
+{:+ {:app [(:lt.objs.plugins/load-js "rubocop_compiled.js")]
+
+     :editor [:lt.plugins.rubocop/run-file
+              :lt.plugins.rubocop/inline-hints]}}
