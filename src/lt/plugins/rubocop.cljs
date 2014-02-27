@@ -5,10 +5,14 @@
             [lt.objs.editor :as editor]
             [lt.objs.editor.pool :as pool]
             [lt.objs.files :as files]
+            [lt.util.load :as load]
             [lt.objs.proc :as proc])
   (:require-macros [lt.macros :refer [defui behavior background]]))
 
 (def exec (.-exec (js/require "child_process")))
+(def shell (load/node-module "shelljs"))
+
+(def rubocop-path (.which shell "rubocop"))
 
 (defn violations-for-file [json-str]
   (let [parsed (js->clj (JSON/parse json-str))]
@@ -20,9 +24,9 @@
        violations))
 
 (def offences
-  (background (fn [this cwd path]
+  (background (fn [this cwd path rubocop-path]
                 (.exec (js/require "child_process")
-                       (str "/Users/seancaffery/.rbenv/shims/rubocop --format json '" path "'")
+                       (str rubocop-path " --format json '" path "'")
                        (clj->js {"cwd" cwd})
                        (fn [err stdout stderr]
                           (raise this :cop-finished stdout)
@@ -39,7 +43,7 @@
           :reaction (fn [this]
                       (let [active-ed (pool/last-active)
                             path (-> @active-ed :info :path)]
-                      (offences this (files/parent path) path))))
+                      (offences this (files/parent path) path rubocop-path))))
 
 (cmd/command {:command ::run-cop
               :desc "Rubocop: start"
