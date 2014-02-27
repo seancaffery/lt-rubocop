@@ -37,6 +37,11 @@
           :reaction (fn [this hints]
                       (.log js/console #js ["zomg doing" (first (offence-line-map (violations-for-file hints)))])
                       ))
+(behavior ::on-save
+                  :triggers #{:save}
+                  :desc "rubocop: Run rubocop on save"
+                  :reaction (fn [this]
+                              (object/raise this ::run-file)))
 
 (behavior ::run-file
           :triggers #{::run-file}
