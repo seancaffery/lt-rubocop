@@ -1,6 +1,6 @@
-{:name "rubocop"
+{:name "RuboCop"
  :version "0.0.1"
  :author "Sean Caffery"
- :source ""
- :desc "Runs rubocop against an open Ruby file"
+ :source "https://github.com/seancaffery/lt-rubocop"
+ :desc "Runs RuboCop against an open Ruby file"
  :behaviors "rubocop.behaviors"}
