@@ -69,7 +69,7 @@
 
 (behavior ::on-save
           :triggers #{:save}
-          :desc "rubocop: Run rubocop on save"
+          :desc "RuboCop: Run RuboCop on save"
           :reaction (fn [this]
                       (object/raise this ::run-file)))
 
@@ -81,6 +81,6 @@
                       (offences this (files/parent path) path rubocop-path))))
 
 (cmd/command {:command ::run-cop
-              :desc "Rubocop: start"
+              :desc "RuboCop: Run RuboCop against current file"
               :exec (fn []
                       (object/raise (pool/last-active) ::run-file))})
