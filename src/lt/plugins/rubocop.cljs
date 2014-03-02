@@ -14,7 +14,7 @@
 
 (def rubocop-path (.which shell "rubocop"))
 
-(defui cop-marker [this cops]
+(defui cop-marker [cops]
   [:div.rubocop-gutter-marker
    {:style (str " color: blue; background: #ffffff; overflow: hidden")
     :title (clojure.string/join "\n" cops)}
@@ -39,9 +39,8 @@
                           (raise this :cop-finished stdout)
                         )))))
 
-(defn clear-gutters []
-  (let [line-nos (range (editor/line-count (editor/->cm-ed (pool/last-active))))
-        ed (editor/->cm-ed (pool/last-active))]
+(defn clear-gutters [ed]
+  (let [line-nos (range (editor/line-count ed))]
     (editor/operation ed (fn []
       (doseq [idx line-nos]
         (.setGutterMarker ed idx "cop-gutter" ))))))
@@ -49,23 +48,22 @@
 (behavior ::cop-finished
           :triggers #{:cop-finished}
           :reaction (fn [this cops]
-                      (let [ed (editor/->cm-ed (pool/last-active))
-                            current-gutters (set (js->clj (editor/option (pool/last-active) "gutters")))
-                            gutter-div (dom/$ :div.CodeMirror-gutters (object/->content (pool/last-active)))
-
+                      (let [active-ed (pool/last-active)
+                            ed (editor/->cm-ed active-ed)
+                            current-gutters (set (js->clj (editor/option active-ed "gutters")))
+                            gutter-div (dom/$ :div.CodeMirror-gutters (object/->content active-ed))
                             line-map (offence-line-map (violations-for-file cops))
                             cops-by-line (group-by :line line-map)
                             gutter-markers (map (fn [[line cops]]
-                                                  {:line line :mark (cop-marker ed (map #(:message %) cops))}) cops-by-line)]
+                                                  {:line line :mark (cop-marker (map #(:message %) cops))}) cops-by-line)]
                         (editor/operation ed
                                           (fn []
-                                            (clear-gutters)
+                                            (clear-gutters ed)
                                             (editor/set-options ed {:gutters (clj->js (conj current-gutters "cop-gutter"))})
                                             (dom/set-css (dom/$ :div.cop-gutter gutter-div) {"width" "8px"})
-                                            (doall (map-indexed
-                                                    (fn [idx gutter-marker]
-                                                      (.setGutterMarker ed (dec (:line gutter-marker)) "cop-gutter" (:mark gutter-marker)))
-                                                        gutter-markers)))))))
+                                            (doall (map (fn [gutter-marker]
+                                                          (.setGutterMarker ed (dec (:line gutter-marker)) "cop-gutter" (:mark gutter-marker)))
+                                                            gutter-markers)))))))
 
 (behavior ::on-save
           :triggers #{:save}
