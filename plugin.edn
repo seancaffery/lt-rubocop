@@ -1,5 +1,5 @@
 {:name "RuboCop"
- :version "0.0.1"
+ :version "0.0.2"
  :author "Sean Caffery"
  :source "https://github.com/seancaffery/lt-rubocop"
  :desc "RuboCop integration for Light Table"
