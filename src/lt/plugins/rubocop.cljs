@@ -69,6 +69,11 @@
           :desc "RuboCop: Run RuboCop on save"
           :reaction (fn [this]
                       (object/raise this ::run-file)))
+(behavior ::on-open
+          :triggers #{:object.instant}
+          :desc "RuboCop: Run RuboCop on file open"
+          :reaction (fn [this]
+                      (object/raise this ::run-file)))
 
 (behavior ::run-file
           :triggers #{::run-file}

@@ -2,4 +2,5 @@
 
      :editor.ruby [:lt.plugins.rubocop/run-file
                    :lt.plugins.rubocop/cop-finished
-                   :lt.plugins.rubocop/on-save]}}
+                   :lt.plugins.rubocop/on-save
+                   :lt.plugins.rubocop/on-open]}}
