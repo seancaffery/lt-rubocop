@@ -48,10 +48,9 @@
 (behavior ::cop-finished
           :triggers #{:cop-finished}
           :reaction (fn [this cops]
-                      (let [active-ed (pool/last-active)
-                            ed (editor/->cm-ed active-ed)
-                            current-gutters (set (js->clj (editor/option active-ed "gutters")))
-                            gutter-div (dom/$ :div.CodeMirror-gutters (object/->content active-ed))
+                      (let [ed (editor/->cm-ed this)
+                            current-gutters (set (js->clj (editor/option this "gutters")))
+                            gutter-div (dom/$ :div.CodeMirror-gutters (object/->content this))
                             line-map (offence-line-map (violations-for-file cops))
                             cops-by-line (group-by :line line-map)
                             gutter-markers (map (fn [[line cops]]
@@ -74,8 +73,7 @@
 (behavior ::run-file
           :triggers #{::run-file}
           :reaction (fn [this]
-                      (let [active-ed (pool/last-active)
-                            path (-> @active-ed :info :path)]
+                      (let [path (-> @this :info :path)]
                       (offences this (files/parent path) path rubocop-path))))
 
 (cmd/command {:command ::run-cop
