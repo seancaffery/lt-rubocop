@@ -3,6 +3,7 @@
             [lt.objs.tabs :as tabs]
             [lt.objs.command :as cmd]
             [lt.objs.editor :as editor]
+            [lt.objs.notifos :as notifos]
             [lt.objs.editor.pool :as pool]
             [lt.objs.files :as files]
             [lt.util.load :as load]
@@ -55,6 +56,7 @@
                             cops-by-line (group-by :line line-map)
                             gutter-markers (map (fn [[line cops]]
                                                   {:line line :mark (cop-marker (map #(:message %) cops))}) cops-by-line)]
+                        (object/merge! this {::cops-by-line cops-by-line})
                         (editor/operation ed
                                           (fn []
                                             (clear-gutters ed)
@@ -63,6 +65,18 @@
                                             (doall (map (fn [gutter-marker]
                                                           (.setGutterMarker ed (dec (:line gutter-marker)) "cop-gutter" (:mark gutter-marker)))
                                                             gutter-markers)))))))
+
+(behavior ::show-cops-under-cursor
+          :triggers #{:move}
+          :reaction (fn [editor]
+                      (let [previous-posn (or (::previous-cursor @editor) {:line 0, :ch 0})
+                            current-posn (editor/->cursor editor)]
+
+                        (when-not (= (:line previous-posn) (:line current-posn))
+                          (if-let [cops ((or (::cops-by-line @editor) {}) (inc (:line current-posn)))]
+                            (notifos/msg* (:message (first cops)))))
+
+                        (object/merge! editor {::previous-cursor current-posn}))))
 
 (behavior ::on-save
           :triggers #{:save}
