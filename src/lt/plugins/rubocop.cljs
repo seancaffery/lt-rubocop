@@ -40,12 +40,6 @@
                           (raise this :cop-finished stdout)
                         )))))
 
-(defn clear-gutters [ed]
-  (let [line-nos (range (editor/line-count ed))]
-    (editor/operation ed (fn []
-      (doseq [idx line-nos]
-        (.setGutterMarker ed idx "cop-gutter" ))))))
-
 (behavior ::cop-finished
           :triggers #{:cop-finished}
           :reaction (fn [this cops]
@@ -59,7 +53,7 @@
                         (object/merge! this {::cops-by-line cops-by-line})
                         (editor/operation ed
                                           (fn []
-                                            (clear-gutters ed)
+                                            (.clearGutter ed "cop-gutter")
                                             (editor/set-options ed {:gutters (clj->js (conj current-gutters "cop-gutter"))})
                                             (dom/set-css (dom/$ :div.cop-gutter gutter-div) {"width" "8px"})
                                             (doall (map (fn [gutter-marker]
