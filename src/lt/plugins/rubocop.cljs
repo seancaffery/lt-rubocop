@@ -17,10 +17,22 @@
 
 (defui cop-marker [cops]
   [:div.rubocop-gutter-marker
-   {:style (str " color: blue; background: #ffffff; overflow: hidden")
-    :title (clojure.string/join "\n" cops)}
    [:div.cop-gutter-dot
-    {:style "width: 8px; height: 10px; background: red;"}]])
+    {:style "width: 8px; height: 10px; background: red;"}]
+   [:div.cops
+    {:style "display:none;width: 310px; background:var(bg); padding: 5px; left: 10px; top: -1px; position: absolute;"
+     :class "cm-variable"}
+    [:ul
+     (map (fn [c]
+            [:li
+             {:style "padding-bottom: 3px; display:block"}
+             (str "- " c)]) cops)]]]
+  :mouseover (fn [e]
+               (if-let [target (dom/next (.-target e))]
+                 (dom/set-css target {:display :block})))
+  :mouseout (fn [e]
+               (if-let [target (dom/next (.-target e))]
+                 (dom/set-css target {:display :none}))))
 
 (defn violations-for-file [json-str]
   (let [parsed (js->clj (JSON/parse json-str))]
