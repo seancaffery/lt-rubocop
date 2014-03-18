@@ -35,8 +35,12 @@
                  (dom/set-css target {:display :none}))))
 
 (defn violations-for-file [json-str]
-  (let [parsed (js->clj (JSON/parse json-str))]
-    (-> parsed (get "files") first (get "offences") )))
+  (let [parsed (js->clj (JSON/parse json-str))
+        file-info (first (get parsed "files"))
+        offence-key (if (contains? file-info "offenses")
+                      "offenses"
+                      "offences")]
+    (get file-info offence-key)))
 
 (defn offence-line-map [violations]
   (map (fn [violation]
