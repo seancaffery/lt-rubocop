@@ -13,8 +13,6 @@
 
 (def shell (load/node-module "shelljs"))
 
-(def rubocop-path (.which shell "rubocop"))
-
 (defui cop-marker [cops]
   [:div.rubocop-gutter-marker
    [:div.cop-gutter-dot
@@ -102,8 +100,11 @@
 (behavior ::run-file
           :triggers #{::run-file}
           :reaction (fn [this]
-                      (let [path (-> @this :info :path)]
-                      (offences this (files/parent path) path rubocop-path))))
+                      (let [path (-> @this :info :path)
+                            rubocop-path (.which shell "rubocop")]
+                        (if rubocop-path
+                          (offences this (files/parent path) path rubocop-path)
+                          (notifos/msg* "RuboCop not found. Install with `gem install rubocop`.")))))
 
 (cmd/command {:command ::run-cop
               :desc "RuboCop: Run RuboCop against current file"
