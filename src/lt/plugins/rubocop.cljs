@@ -51,15 +51,18 @@
                        (str rubocop-path " --format json '" path "'")
                        (clj->js {"cwd" cwd})
                        (fn [err stdout stderr]
-                          (raise this :cop-finished stdout)
-                        )))))
+                           (raise this :cop-finished stdout))))))
+
+(defn setup-gutter [this]
+  (let [ed (editor/->cm-ed this)
+        current-gutters (set (js->clj (editor/option this "gutters")))]
+    (editor/set-options ed {:gutters (clj->js (conj current-gutters "cop-gutter"))})
+    (object/add-tags this #{::git-blame-on})))
 
 (behavior ::cop-finished
           :triggers #{:cop-finished}
           :reaction (fn [this cops]
                       (let [ed (editor/->cm-ed this)
-                            current-gutters (set (js->clj (editor/option this "gutters")))
-                            gutter-div (dom/$ :div.CodeMirror-gutters (object/->content this))
                             line-map (offence-line-map (violations-for-file cops))
                             cops-by-line (group-by :line line-map)
                             gutter-markers (map (fn [[line cops]]
@@ -68,8 +71,6 @@
                         (editor/operation ed
                                           (fn []
                                             (.clearGutter ed "cop-gutter")
-                                            (editor/set-options ed {:gutters (clj->js (conj current-gutters "cop-gutter"))})
-                                            (dom/set-css (dom/$ :div.cop-gutter gutter-div) {"width" "8px"})
                                             (doall (map (fn [gutter-marker]
                                                           (.setGutterMarker ed (dec (:line gutter-marker)) "cop-gutter" (:mark gutter-marker)))
                                                             gutter-markers)))))))
@@ -102,6 +103,8 @@
           :reaction (fn [this]
                       (let [path (-> @this :info :path)
                             rubocop-path (.which shell "rubocop")]
+                        (if-not (object/has-tag? this ::rubocop-on)
+                          (setup-gutter this))
                         (if rubocop-path
                           (offences this (files/parent path) path rubocop-path)
                           (notifos/msg* "RuboCop not found. Install with `gem install rubocop`.")))))

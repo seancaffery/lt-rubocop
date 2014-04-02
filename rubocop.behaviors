@@ -1,4 +1,5 @@
-{:+ {:app [(:lt.objs.plugins/load-js "rubocop_compiled.js")]
+{:+ {:app [(:lt.objs.plugins/load-js "rubocop_compiled.js")
+           (:lt.objs.plugins/load-css "css/rubocop.css")]
 
      :editor.ruby [:lt.plugins.rubocop/show-cops-under-cursor
                    :lt.plugins.rubocop/run-file
