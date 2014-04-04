@@ -56,8 +56,7 @@
 (defn setup-gutter [this]
   (let [ed (editor/->cm-ed this)
         current-gutters (set (js->clj (editor/option this "gutters")))]
-    (editor/set-options ed {:gutters (clj->js (conj current-gutters "cop-gutter"))})
-    (object/add-tags this #{::git-blame-on})))
+    (editor/set-options ed {:gutters (clj->js (conj current-gutters "cop-gutter"))})))
 
 (behavior ::cop-finished
           :triggers #{:cop-finished}
