@@ -81,8 +81,8 @@
 
                         (when-not (= (:line previous-posn) (:line current-posn))
                           (if-let [cops ((or (::cops-by-line @editor) {}) (inc (:line current-posn)))]
-                            (notifos/msg* (:message (first cops)))))
-
+                            (notifos/msg* (:message (first cops)))
+                            (notifos/msg* "")))
                         (object/merge! editor {::previous-cursor current-posn}))))
 
 (behavior ::on-save
